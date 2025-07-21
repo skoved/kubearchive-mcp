@@ -21,7 +21,7 @@ async def make_request(
     else:
         headers = {}
 
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(verify=False) as client:
         if method.upper() == "GET":
             response = await client.request(method, url, headers=headers, params=data)
         else:
@@ -31,9 +31,9 @@ async def make_request(
 
 
 @mcp.tool()
-async def example():
-    """Simple example tool to demonstrate MCP server functionality."""
-    url = f"{API_BASE_URL}/example"
+async def logs(resourceType: str, name: str, namespace: str):
+    """Get the logs of a Kubernetes resource from KubeArchive"""
+    url = f"{API_BASE_URL}/api/v1/namespaces/{namespace}/{resourceType}/{name}/log"
     response = await make_request(url)
     return response
 
