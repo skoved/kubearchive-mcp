@@ -81,5 +81,21 @@ async def resources(apiGroup: str, apiVersion: str, resourceType: str, namespace
     names = [{"name": x["metadata"]["name"], "namespace": x["metadata"]["namespace"], "owner": x["metadata"]["ownerReferences"][0]["name"]} for x in response["items"]]
     return names
 
+@mcp.tool()
+async def resource(apiGroup: str, apiVersion: str, resourceType: str, name: str, namespace: str):
+    """Get a Kubernetes resource from KubeArchive given the api group, api version, resource type, name and namespace"""
+    if not resourceType.endswith("s"):
+        resourceType = engine.plural(resourceType.lower())
+    else:
+        resourceType = resourceType.lower()
+
+    apiGroupVersion = f"apis/{apiGroup.lower()}/{apiVersion.lower()}"
+    if (apiGroup.lower() == "core" or apiGroup == "") and apiVersion.lower() == "v1":
+        apiGroupVersion = "api/v1"
+
+    url = f"{API_BASE_URL}/{apiGroupVersion}/namespaces/{namespace.lower()}/{resourceType}/{name.lower()}"
+    response = await make_request(url)
+    return response
+
 if __name__ == "__main__":
     mcp.run(transport=os.environ.get("MCP_TRANSPORT", "stdio"))
